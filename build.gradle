@@ -24,15 +24,37 @@ repositories {
 }
 
 dependencies {
+
+	//Spring Boot starters
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.boot:spring-boot-starter-web-services'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+
+	//Object mapping
+	implementation 'org.modelmapper:modelmapper:3.2.0'
+
+	//Lombok
 	compileOnly 'org.projectlombok:lombok'
-	runtimeOnly 'com.mysql:mysql-connector-j'
 	annotationProcessor 'org.projectlombok:lombok'
+
+	runtimeOnly 'com.mysql:mysql-connector-j'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// Thymeleaf extensions
+    implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
+
+	// Testing
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+	testImplementation 'net.andreinc:mockneat:0.4.8'
 }
+
 
 tasks.named('test') {
 	useJUnitPlatform()
