@@ -11,6 +11,9 @@ spring:
     url: ${DB_URL:}
     username: ${DB_USERNAME:}
     password: ${DB_PASSWORD:}
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
 
 security:
   jwt:
