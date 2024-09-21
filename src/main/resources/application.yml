@@ -11,9 +11,8 @@ spring:
     url: ${DB_URL:}
     username: ${DB_USERNAME:}
     password: ${DB_PASSWORD:}
-  thymeleaf:
-    prefix: classpath:/templates/
-    suffix: .html
+  hikari:
+  connection-timeout: 60000
 
 security:
   jwt:
@@ -29,4 +28,4 @@ services:
     api-key: ${SENDGRID_API_KEY:}
 
 app:
-  domain: http:/
+  domain: http://localhost:8080
