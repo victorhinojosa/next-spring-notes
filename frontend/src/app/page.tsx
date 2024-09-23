@@ -27,8 +27,9 @@ import {
   Edit as EditIcon,
   ColorLens as ColorLensIcon,
 } from '@mui/icons-material'
+import { Note, NoteSearcher, NoteRegister, NoteEditor, NoteDeleter } from './services/note-services'
 
-// Crear un tema personalizado que se acerque a Material Design 3
+// Create a custom theme that closely resembles Material Design 3
 const theme = createTheme({
   palette: {
     primary: {
@@ -66,63 +67,68 @@ const theme = createTheme({
   },
 })
 
-interface Note {
-  id: number
-  title: string
-  content: string
-  color: string
+interface NoteWithColor extends Note {
+  color: string;
 }
 
-// Notas de ejemplo
-const initialNotes: Note[] = [
-  { id: 1, title: 'Bienvenido a MaterialKeep', content: 'Esta es tu primera nota. ¡Empieza a organizar tus ideas!', color: '#ffffff' },
-  { id: 2, title: 'Tip del día', content: 'Usa diferentes colores para categorizar tus notas.', color: '#f28b82' },
-  { id: 3, title: 'Recordatorio', content: 'Haz clic en el botón + para añadir una nueva nota.', color: '#fbbc04' },
-]
-
 export default function Component() {
-  const [notes, setNotes] = useState<Note[]>(initialNotes)
+  const [notes, setNotes] = useState<NoteWithColor[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [openDialog, setOpenDialog] = useState(false)
-  const [currentNote, setCurrentNote] = useState<Note | null>(null)
+  const [currentNote, setCurrentNote] = useState<NoteWithColor | null>(null)
 
   useEffect(() => {
-    const savedNotes = localStorage.getItem('notes')
-    if (savedNotes) {
-      setNotes(JSON.parse(savedNotes))
-    }
+    fetchNotes()
   }, [])
 
-  useEffect(() => {
-    localStorage.setItem('notes', JSON.stringify(notes))
-  }, [notes])
+  const fetchNotes = async () => {
+    try {
+      const fetchedNotes = await NoteSearcher.search()
+      setNotes(fetchedNotes.map(note => ({ ...note, color: '#ffffff' })))
+    } catch (error) {
+      console.error('Failed to fetch notes:', error)
+    }
+  }
 
   const handleAddNote = () => {
-    setCurrentNote({ id: Date.now(), title: '', content: '', color: '#ffffff' })
+    setCurrentNote({ id: '', content: '', color: '#ffffff' })
     setOpenDialog(true)
   }
 
-  const handleEditNote = (note: Note) => {
+  const handleEditNote = (note: NoteWithColor) => {
     setCurrentNote(note)
     setOpenDialog(true)
   }
 
-  const handleDeleteNote = (id: number) => {
-    setNotes(notes.filter(note => note.id !== id))
-  }
-
-  const handleSaveNote = () => {
-    if (currentNote) {
-      const newNotes = currentNote.id
-        ? notes.map(note => (note.id === currentNote.id ? currentNote : note))
-        : [...notes, currentNote]
-      setNotes(newNotes)
-      setOpenDialog(false)
-      setCurrentNote(null)
+  const handleDeleteNote = async (id: string) => {
+    try {
+      await NoteDeleter.delete(id)
+      setNotes(notes.filter(note => note.id !== id))
+    } catch (error) {
+      console.error('Failed to delete note:', error)
     }
   }
 
-  const handleChangeColor = (id: number) => {
+  const handleSaveNote = async () => {
+    if (currentNote) {
+      try {
+        const noteToSave = new Note({ id: currentNote.id, content: currentNote.content })
+        let savedNote
+        if (currentNote.id) {
+          savedNote = await NoteEditor.edit(noteToSave)
+        } else {
+          savedNote = await NoteRegister.register(noteToSave)
+        }
+        await fetchNotes()
+        setOpenDialog(false)
+        setCurrentNote(null)
+      } catch (error) {
+        console.error('Failed to save note:', error)
+      }
+    }
+  }
+
+  const handleChangeColor = (id: string) => {
     const colors = ['#ffffff', '#f28b82', '#fbbc04', '#fff475', '#ccff90', '#a7ffeb', '#cbf0f8', '#aecbfa', '#d7aefb', '#fdcfe8']
     const currentIndex = notes.findIndex(note => note.id === id)
     const currentColorIndex = colors.indexOf(notes[currentIndex].color)
@@ -133,11 +139,8 @@ export default function Component() {
   }
 
   const filteredNotes = notes.filter(note =>
-    note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     note.content.toLowerCase().includes(searchTerm.toLowerCase())
   )
-
-  console.log('Notas filtradas:', filteredNotes) // Para depuración
 
   return (
     <ThemeProvider theme={theme}>
@@ -153,8 +156,8 @@ export default function Component() {
               </IconButton>
               <InputBase
                 sx={{ ml: 1, flex: 1 }}
-                placeholder="Buscar notas"
-                inputProps={{ 'aria-label': 'buscar notas' }}
+                placeholder="Search notes"
+                inputProps={{ 'aria-label': 'search notes' }}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -167,21 +170,18 @@ export default function Component() {
               <Grid item key={note.id} xs={12} sm={6} md={4} lg={3}>
                 <Card sx={{ bgcolor: note.color }}>
                   <CardContent>
-                    <Typography variant="h6" component="div">
-                      {note.title}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2">
                       {note.content}
                     </Typography>
                   </CardContent>
                   <CardActions disableSpacing>
-                    <IconButton aria-label="editar nota" onClick={() => handleEditNote(note)}>
+                    <IconButton aria-label="edit note" onClick={() => handleEditNote(note)}>
                       <EditIcon />
                     </IconButton>
-                    <IconButton aria-label="cambiar color" onClick={() => handleChangeColor(note.id)}>
+                    <IconButton aria-label="change color" onClick={() => handleChangeColor(note.id)}>
                       <ColorLensIcon />
                     </IconButton>
-                    <IconButton aria-label="eliminar nota" onClick={() => handleDeleteNote(note.id)}>
+                    <IconButton aria-label="delete note" onClick={() => handleDeleteNote(note.id)}>
                       <DeleteIcon />
                     </IconButton>
                   </CardActions>
@@ -194,20 +194,12 @@ export default function Component() {
           <AddIcon />
         </Fab>
         <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-          <DialogTitle>{currentNote && currentNote.id ? 'Editar Nota' : 'Nueva Nota'}</DialogTitle>
+          <DialogTitle>{currentNote && currentNote.id ? 'Edit Note' : 'New Note'}</DialogTitle>
           <DialogContent>
             <TextField
               autoFocus
               margin="dense"
-              label="Título"
-              type="text"
-              fullWidth
-              value={currentNote ? currentNote.title : ''}
-              onChange={(e) => setCurrentNote(currentNote ? { ...currentNote, title: e.target.value } : null)}
-            />
-            <TextField
-              margin="dense"
-              label="Contenido"
+              label="Content"
               type="text"
               fullWidth
               multiline

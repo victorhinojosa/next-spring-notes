@@ -7,12 +7,14 @@ jasypt:
 spring:
   flyway:
     locations: classpath:db/migration/mysql
+    baseline-on-migrate: true
+    out-of-order: true
   datasource:
     url: ${DB_URL:}
     username: ${DB_USERNAME:}
     password: ${DB_PASSWORD:}
-  hikari:
-  connection-timeout: 60000
+    hikari:
+      connection-timeout: 60000
 
 security:
   jwt:
@@ -29,3 +31,7 @@ services:
 
 app:
   domain: http://localhost:8080
+
+logging:  
+  level:    
+    org.flywaydb: DEBUG
