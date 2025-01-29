@@ -6,8 +6,8 @@ import { NoteEditor, NoteRegister, NoteSearcher } from '@/notes/app/note-service
 import { Note } from '@/notes/domain/note';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import NoteCard from '@/components/NoteCard';
-import NoteForm from '@/notes/components/NoteForm';
+import NoteCard from '@/notes/components/NoteCard';
+import NoteDialog from '@/notes/components/NoteDialog';
 
 const theme = createTheme({
   palette: {
@@ -19,8 +19,8 @@ const theme = createTheme({
       main: '#f50057',
     },
     background: {
-      default: '#121212', // Fondo oscuro moderno
-      paper: '#1e1e1e',   // Un poco más claro para las tarjetas
+      default: '#121212',
+      paper: '#1e1e1e',
     },
   },
   shape: {
@@ -45,7 +45,7 @@ const theme = createTheme({
 export default function Home() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [isNoteFormOpen, setIsNoteFormOpen] = useState(false);
+  const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -64,12 +64,12 @@ export default function Home() {
 
   const handleAddNote = () => {
     setEditingNote(null);
-    setIsNoteFormOpen(true);
+    setIsNoteDialogOpen(true);
   };
 
   const handleEditNote = (note: Note) => {
     setEditingNote(note);
-    setIsNoteFormOpen(true);
+    setIsNoteDialogOpen(true);
   };
 
   const handleSaveNote = async (noteData: { content: string }) => {
@@ -93,7 +93,7 @@ export default function Home() {
         setNotes(prevNotes => [...prevNotes, noteToAdd]);
       }
       // Solo cerramos el formulario después de que la operación se complete exitosamente
-      setIsNoteFormOpen(false);
+      setIsNoteDialogOpen(false);
       setEditingNote(null);
       // Opcional: recargar las notas después de guardar
       await fetchNotes();
@@ -147,9 +147,9 @@ export default function Home() {
           <AddIcon />
         </Fab>
         <Footer />
-        <NoteForm
-            open={isNoteFormOpen}
-            onClose={() => setIsNoteFormOpen(false)}
+        <NoteDialog
+            open={isNoteDialogOpen}
+            onClose={() => setIsNoteDialogOpen(false)}
             onSave={handleSaveNote}
             isSaving={isSaving}
         />

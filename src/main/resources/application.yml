@@ -8,7 +8,7 @@ spring:
   flyway:
     locations: classpath:db/migration/mysql
   datasource:
-    url: jdbc:mysql://db:3306/mindkeep?useSSL=true&allowPublicKeyRetrieval=true&serverTimezone=America/Mexico_City
+    url: jdbc:mysql://db:3306/notesapp?useSSL=true&allowPublicKeyRetrieval=true&serverTimezone=America/Mexico_City
     username: ${DB_USERNAME:}
     password: ${DB_PASSWORD:}
 
