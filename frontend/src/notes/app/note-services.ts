@@ -1,6 +1,6 @@
 import { NoteApiClient } from '../infrastructure/note-api-client';
 import { Note } from '../domain/note';
-import { API_ENDPOINTS } from '../../config/api-endpoints';
+import { API_ENDPOINTS } from '../../api/api-endpoints';
 
 export class NoteRegister {
   static async register(note: Note): Promise<Note> {

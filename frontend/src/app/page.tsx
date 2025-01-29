@@ -2,28 +2,43 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Container, Grid, Fab, ThemeProvider, createTheme } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import { NoteEditor, NoteRegister, NoteSearcher } from '../notes/app/note-services';
-import { Note } from '../notes/domain/note';
-import Header from './components/Header';
-import Footer from './components/Footer';
-import NoteCard from '../notes/components/NoteCard';
-import NoteForm from '../notes/components/NoteFormProps';
+import { NoteEditor, NoteRegister, NoteSearcher } from '@/notes/app/note-services';
+import { Note } from '@/notes/domain/note';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import NoteCard from '@/components/NoteCard';
+import NoteForm from '@/notes/components/NoteForm';
 
 const theme = createTheme({
   palette: {
+    mode: 'dark',
     primary: {
-      main: '#006495',
+      main: '#2196f3',
     },
     secondary: {
-      main: '#625b71',
+      main: '#f50057',
     },
     background: {
-      default: '#f0e68c', 
-      paper: '#ffffff',
+      default: '#121212', // Fondo oscuro moderno
+      paper: '#1e1e1e',   // Un poco más claro para las tarjetas
     },
   },
   shape: {
-    borderRadius: 16,
+    borderRadius: 12,
+  },
+  components: {
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.2)',
+          transition: 'transform 0.2s, box-shadow 0.2s',
+          '&:hover': {
+            transform: 'translateY(-4px)',
+            boxShadow: '0 8px 12px rgba(0, 0, 0, 0.3)',
+          },
+        },
+      },
+    },
   },
 });
 
@@ -32,6 +47,7 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isNoteFormOpen, setIsNoteFormOpen] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     fetchNotes();
@@ -56,18 +72,35 @@ export default function Home() {
     setIsNoteFormOpen(true);
   };
 
-  const handleSaveNote = async (note: Note) => {
+  const handleSaveNote = async (noteData: { content: string }) => {
+    setIsSaving(true);
     try {
-      let savedNote: Note;
       if (editingNote) {
-        savedNote = await NoteEditor.edit(note);
-        setNotes(notes.map(n => n.id === savedNote.id ? savedNote : n));
+        const updatedNote = new Note({
+          id: editingNote.id,
+          content: noteData.content
+        });
+        const savedNote = await NoteEditor.edit(updatedNote);
+        const noteToUpdate = savedNote instanceof Note ? savedNote : new Note(savedNote);
+        setNotes(prevNotes => prevNotes.map(n => n.id === noteToUpdate.id ? noteToUpdate : n));
       } else {
-        savedNote = await NoteRegister.register(note);
-        setNotes([...notes, savedNote]);
+        const newNote = new Note({
+          id: crypto.randomUUID(),
+          content: noteData.content
+        });
+        const savedNote = await NoteRegister.register(newNote);
+        const noteToAdd = savedNote instanceof Note ? savedNote : new Note(savedNote);
+        setNotes(prevNotes => [...prevNotes, noteToAdd]);
       }
+      // Solo cerramos el formulario después de que la operación se complete exitosamente
+      setIsNoteFormOpen(false);
+      setEditingNote(null);
+      // Opcional: recargar las notas después de guardar
+      await fetchNotes();
     } catch (error) {
       console.error('Failed to save note:', error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -83,28 +116,43 @@ export default function Home() {
     <ThemeProvider theme={theme}>
       <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         <Header onSearch={setSearchTerm} />
-        <Container component="main" sx={{ mt: 4, mb: 2, flex: 1 }}>
-          <Grid container spacing={3}>
+        <Container component="main" sx={{ mt: 4, mb: 2, flex: 1, maxWidth: 'lg' }}>
+          <Grid container spacing={3} sx={{ py: 2 }}>
             {filteredNotes.map((note) => (
-              <Grid item key={note.id} xs={12} sm={6} md={4}>
-                <NoteCard
-                  content={note.content}
-                  onEdit={() => handleEditNote(note)}
-                  onDelete={() => handleDeleteNote(note.id)}
-                />
-              </Grid>
+                <Grid item key={note.id} xs={12} sm={6} md={4} lg={3}>
+                  <NoteCard
+                      content={note.content}
+                      onEdit={() => handleEditNote(note)}
+                      onDelete={() => handleDeleteNote(note.id)}
+                  />
+                </Grid>
             ))}
           </Grid>
         </Container>
-        <Fab 
-          color="primary" 
-          aria-label="add" 
-          sx={{ position: 'fixed', bottom: 16, right: 16 }}
-          onClick={handleAddNote}
+        <Fab
+            color="primary"
+            aria-label="add"
+            sx={{
+              position: 'fixed',
+              bottom: 24,
+              right: 24,
+              boxShadow: '0 4px 12px rgba(33, 150, 243, 0.4)',
+              '&:hover': {
+                transform: 'scale(1.1)',
+              },
+              transition: 'transform 0.2s',
+            }}
+            onClick={handleAddNote}
         >
           <AddIcon />
         </Fab>
         <Footer />
+        <NoteForm
+            open={isNoteFormOpen}
+            onClose={() => setIsNoteFormOpen(false)}
+            onSave={handleSaveNote}
+            isSaving={isSaving}
+        />
       </Box>
     </ThemeProvider>
   );
