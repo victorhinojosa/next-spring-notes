@@ -48,10 +48,11 @@ export default function Home() {
   const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [refresh, setRefresh] = useState(0);
 
   useEffect(() => {
     fetchNotes();
-  }, []);
+  }, [refresh]);
 
   const fetchNotes = async () => {
     try {
@@ -67,7 +68,7 @@ export default function Home() {
     setIsNoteDialogOpen(true);
   };
 
-  const handleEditNote = (note: Note) => {
+  const handleNoteClick = (note: Note) => {
     setEditingNote(note);
     setIsNoteDialogOpen(true);
   };
@@ -80,32 +81,28 @@ export default function Home() {
           id: editingNote.id,
           content: noteData.content
         });
-        const savedNote = await NoteEditor.edit(updatedNote);
-        const noteToUpdate = savedNote instanceof Note ? savedNote : new Note(savedNote);
-        setNotes(prevNotes => prevNotes.map(n => n.id === noteToUpdate.id ? noteToUpdate : n));
+        await NoteEditor.edit(updatedNote);
       } else {
         const newNote = new Note({
           id: crypto.randomUUID(),
           content: noteData.content
         });
-        const savedNote = await NoteRegister.register(newNote);
-        const noteToAdd = savedNote instanceof Note ? savedNote : new Note(savedNote);
-        setNotes(prevNotes => [...prevNotes, noteToAdd]);
+        await NoteRegister.register(newNote);
       }
-      // Solo cerramos el formulario después de que la operación se complete exitosamente
       setIsNoteDialogOpen(false);
       setEditingNote(null);
-      // Opcional: recargar las notas después de guardar
       await fetchNotes();
+      setRefresh(prev => prev + 1);
     } catch (error) {
       console.error('Failed to save note:', error);
+      fetchNotes();
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleDeleteNote = async (id: string) => {
-    // Implementar lógica para eliminar nota
+    // Implement logic to delete note
   };
 
   const filteredNotes = notes.filter(note =>
@@ -122,8 +119,7 @@ export default function Home() {
                 <Grid item key={note.id} xs={12} sm={6} md={4} lg={3}>
                   <NoteCard
                       content={note.content}
-                      onEdit={() => handleEditNote(note)}
-                      onDelete={() => handleDeleteNote(note.id)}
+                      onClick={() => handleNoteClick(note)}
                   />
                 </Grid>
             ))}
@@ -152,6 +148,8 @@ export default function Home() {
             onClose={() => setIsNoteDialogOpen(false)}
             onSave={handleSaveNote}
             isSaving={isSaving}
+            initialContent={editingNote?.content || ''}
+            isNewNote={!editingNote}
         />
       </Box>
     </ThemeProvider>

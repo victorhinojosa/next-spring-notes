@@ -3,5 +3,5 @@ const API_BASE_URL: string = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://loc
 export const API_ENDPOINTS = {
   
   NOTES: `${API_BASE_URL}/notes`,
-  NOTE: (id: string): string => `${API_BASE_URL}/notes/${id}`,
+  NOTE: (id: string): string => `${API_BASE_URL}/note/${id}`,
 };

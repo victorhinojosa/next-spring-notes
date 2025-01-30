@@ -1,33 +1,52 @@
-// src/notes/components/NoteForm.tsx
-import React, { useState } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, CircularProgress} from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { Dialog, DialogContent, DialogActions, Button, TextField} from '@mui/material';
 
 interface NoteDialogProps {
     open: boolean;
     onClose: () => void;
     onSave: (note: { content: string }) => void;
+    initialContent?: string;
+    isNewNote?: boolean;
     isSaving?: boolean;
 }
 
-const NoteDialog: React.FC<NoteDialogProps> = ({ open, onClose, onSave, isSaving = false }) => {
+const NoteDialog: React.FC<NoteDialogProps> = ({ open, onClose, onSave, initialContent= '', isNewNote = false, isSaving = false }) => {
     const [content, setContent] = useState('');
+    const [hasChanges, setHasChanges] = useState(false);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        try {
-            await onSave({ content });
-            setContent('');
+    useEffect(() => {
+        if (open) {
+            setContent(initialContent);
+            setHasChanges(false);
+        }
+    }, [open, initialContent]);
+
+    const handleSave = async () => {
+        if (content.trim()) {
+            try {
+                await onSave({ content });
+                setContent('');
+                setHasChanges(false);
+                onClose();
+            } catch (error) {
+                console.error('Error saving note:', error);
+            }
+        } else {
             onClose();
-        } catch (error) {
-            console.error('Error saving note:', error);
         }
     };
 
-    React.useEffect(() => {
-        if (!open) {
-            setContent('');
+    const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        setContent(e.target.value);
+        setHasChanges(true);
+    };
+
+    const handleKeyPress = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && !e.shiftKey && isNewNote) {
+            e.preventDefault();
+            handleSave();
         }
-    }, [open]);
+    };
 
     return (
         <Dialog
@@ -42,56 +61,49 @@ const NoteDialog: React.FC<NoteDialogProps> = ({ open, onClose, onSave, isSaving
                 }
             }}
         >
-            <form onSubmit={handleSubmit}>
-                <DialogTitle sx={{ color: 'white' }}>Nueva Nota</DialogTitle>
-                <DialogContent>
-                    <TextField
-                        autoFocus
-                        multiline
-                        rows={4}
-                        fullWidth
-                        value={content}
-                        onChange={(e) => setContent(e.target.value)}
-                        placeholder="Escribe tu nota aquí..."
-                        variant="outlined"
-                        margin="normal"
-                        sx={{
-                            '& .MuiOutlinedInput-root': {
-                                color: 'white',
-                                '& fieldset': {
-                                    borderColor: 'rgba(255, 255, 255, 0.23)',
-                                },
-                                '&:hover fieldset': {
-                                    borderColor: 'rgba(255, 255, 255, 0.5)',
-                                },
-                                '&.Mui-focused fieldset': {
-                                    borderColor: '#2196f3',
-                                },
+            <DialogContent>
+                <TextField
+                    autoFocus
+                    multiline
+                    rows={4}
+                    fullWidth
+                    value={content}
+                    onChange={handleChange}
+                    onKeyPress={handleKeyPress}
+                    placeholder="Take a note..."
+                    variant="outlined"
+                    margin="normal"
+                    sx={{
+                        '& .MuiOutlinedInput-root': {
+                            color: 'white',
+                            '& fieldset': {
+                                borderColor: 'rgba(255, 255, 255, 0.23)',
                             },
-                            '& .MuiInputLabel-root': {
-                                color: 'rgba(255, 255, 255, 0.7)',
+                            '&:hover fieldset': {
+                                borderColor: 'rgba(255, 255, 255, 0.5)',
                             },
-                        }}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button
-                        onClick={onClose}
-                        disabled={isSaving}
-                        sx={{ color: 'rgba(255, 255, 255, 0.7)' }}
-                    >
-                        Cancelar
-                    </Button>
-                    <Button
-                        type="submit"
-                        variant="contained"
-                        color="primary"
-                        disabled={isSaving || !content.trim()}
-                    >
-                        {isSaving ? <CircularProgress size={24} /> : 'Guardar'}
-                    </Button>
-                </DialogActions>
-            </form>
+                            '&.Mui-focused fieldset': {
+                                borderColor: '#2196f3',
+                            },
+                        },
+                    }}
+                />
+            </DialogContent>
+            <DialogActions>
+                <Button
+                    onClick={handleSave}
+                    disabled={isSaving || (!hasChanges && isNewNote)}
+                    sx={{ color: 'rgba(255, 255, 255, 0.7)' }}
+                >
+                    {isSaving ? 'Saving...' : (
+                        isNewNote ? (
+                            hasChanges && content.trim() ? 'Save' : 'Cancel'
+                        ) : (
+                            'Close'
+                        )
+                    )}
+                </Button>
+            </DialogActions>
         </Dialog>
     );
 };

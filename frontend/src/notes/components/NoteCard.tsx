@@ -1,16 +1,15 @@
 import React from 'react';
-import { Card, CardContent, CardActions, Typography, IconButton } from '@mui/material';
-import { Edit as EditIcon, Delete as DeleteIcon, ColorLens as ColorLensIcon } from '@mui/icons-material';
+import { Card, CardContent, Typography} from '@mui/material';
 
 interface NoteCardProps {
   content: string;
-  onEdit: () => void;
-  onDelete: () => void;
+  onClick: () => void;
 }
 
-const NoteCard: React.FC<NoteCardProps> = ({ content, onEdit, onDelete }) => {
+const NoteCard: React.FC<NoteCardProps> = ({ content, onClick }) => {
     return (
         <Card
+            onClick={onClick}
             sx={{
                 minHeight: 200,
                 display: 'flex',
@@ -18,8 +17,11 @@ const NoteCard: React.FC<NoteCardProps> = ({ content, onEdit, onDelete }) => {
                 justifyContent: 'space-between',
                 position: 'relative',
                 overflow: 'visible',
-                '&:hover .actions': {
-                    opacity: 1,
+                cursor: 'pointer',
+                transition: 'transform 0.2s, box-shadow 0.2s',
+                '&:hover': {
+                    transform: 'translateY(-4px)',
+                    boxShadow: '0 8px 12px rgba(0, 0, 0, 0.3)',
                 },
             }}
         >
@@ -35,46 +37,6 @@ const NoteCard: React.FC<NoteCardProps> = ({ content, onEdit, onDelete }) => {
                     {content}
                 </Typography>
             </CardContent>
-            <CardActions
-                className="actions"
-                sx={{
-                    position: 'absolute',
-                    right: 8,
-                    top: 8,
-                    opacity: 0,
-                    transition: 'opacity 0.2s',
-                    backgroundColor: 'rgba(30, 30, 30, 0.9)',
-                    borderRadius: '20px',
-                    padding: '4px',
-                }}
-            >
-                <IconButton
-                    size="small"
-                    onClick={onEdit}
-                    sx={{
-                        color: 'rgba(255, 255, 255, 0.7)',
-                        '&:hover': {
-                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                            color: 'rgba(255, 255, 255, 0.9)'
-                        }
-                    }}
-                >
-                    <EditIcon fontSize="small" />
-                </IconButton>
-                <IconButton
-                    size="small"
-                    onClick={onDelete}
-                    sx={{
-                        color: 'rgba(255, 255, 255, 0.7)',
-                        '&:hover': {
-                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                            color: 'rgba(255, 255, 255, 0.9)'
-                        }
-                    }}
-                >
-                    <DeleteIcon fontSize="small" />
-                </IconButton>
-            </CardActions>
         </Card>
     );
 };

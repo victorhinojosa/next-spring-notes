@@ -11,15 +11,8 @@ const Header: React.FC<HeaderProps> = ({ onSearch }) => {
     <AppBar position="static" color="default" elevation={0}>
       <Toolbar>
         <Typography variant="h6" noWrap sx={{ flexGrow: 1 }}>
-          Mindkeep
+          Notes
         </Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center', bgcolor: 'background.paper', borderRadius: 1, px: 1 }}>
-          <SearchIcon sx={{ mr: 1 }} />
-          <InputBase
-            placeholder="Search notes"
-            onChange={(e) => onSearch(e.target.value)}
-          />
-        </Box>
       </Toolbar>
     </AppBar>
   );
