@@ -1,70 +1,29 @@
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '3.3.3'
-	id 'io.spring.dependency-management' version '1.1.6'
+    id 'base'
 }
 
-group = 'com.example'
-version = '0.0.1-SNAPSHOT'
-
-java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
-	}
+allprojects {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+    }
 }
 
-configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
+subprojects {
+    group = 'com.example.mindkeep'
+    version = '0.0.1-SNAPSHOT'
 }
 
-repositories {
-	mavenCentral()
+tasks.register('runDev') {
+    group = 'application'
+    description = 'Build frontend and run integrated application on port 8080'
+    dependsOn ':frontend:buildNextApp'
+    finalizedBy ':backend:bootRun'
 }
 
-dependencies {
+defaultTasks 'buildAll'
 
-	//Spring Boot starters
-	implementation 'org.springframework.boot:spring-boot-starter-actuator'
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-mail'
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.boot:spring-boot-starter-actuator'
-	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
-
-	//Object mapping
-	implementation 'org.modelmapper:modelmapper:3.2.0'
-
-	//Lombok
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
-
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-	// Thymeleaf extensions
-    implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
-
-	// Testing
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.security:spring-security-test'
-	testImplementation 'net.andreinc:mockneat:0.4.8'
-
-	// Database and QueryDSL
-	def queryDslVersion = '5.1.0'
-	implementation "com.querydsl:querydsl-core:${queryDslVersion}"
-	implementation "com.querydsl:querydsl-jpa:${queryDslVersion}:jakarta"
-	annotationProcessor "com.querydsl:querydsl-apt:${queryDslVersion}:jakarta"
-	annotationProcessor "jakarta.persistence:jakarta.persistence-api:3.1.0"
-	implementation 'org.flywaydb:flyway-core'
-	implementation 'org.flywaydb:flyway-mysql'
-	runtimeOnly 'com.h2database:h2'
-	runtimeOnly 'com.mysql:mysql-connector-j'
-}
-
-
-tasks.named('test') {
-	useJUnitPlatform()
+wrapper {
+    gradleVersion = '8.8'
+    distributionType = Wrapper.DistributionType.BIN
 }

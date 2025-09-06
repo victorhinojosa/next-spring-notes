@@ -1,1 +1,4 @@
 rootProject.name = 'mindkeep'
+
+include ':backend'
+include ':frontend'

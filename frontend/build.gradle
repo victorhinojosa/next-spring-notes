@@ -1,0 +1,39 @@
+plugins {
+    id 'com.github.node-gradle.node' version '7.0.2'
+    id 'base'
+}
+
+node {
+    version = '20.17.0'
+    npmVersion = '10.8.2'
+    download = true
+    nodeProjectDir = file('.')
+}
+
+tasks.register('cleanFrontend', Delete) {
+    delete 'out', '.next', 'node_modules/.cache'
+}
+
+tasks.register('installDeps', NpmTask) {
+    args = ['install']
+}
+
+tasks.register('buildNextApp', NpmTask) {
+    dependsOn installDeps
+    args = ['run', 'build']
+    inputs.files('package.json', 'package-lock.json', 'next.config.mjs')
+    inputs.dir('src')
+    inputs.dir('public')
+    outputs.dir('out')
+}
+
+tasks.register('lintFrontend', NpmTask) {
+    dependsOn installDeps
+    args = ['run', 'lint']
+}
+
+buildNextApp.dependsOn cleanFrontend
+
+clean.dependsOn cleanFrontend
+assemble.dependsOn buildNextApp
+check.dependsOn lintFrontend
