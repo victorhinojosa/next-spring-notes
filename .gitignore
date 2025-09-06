@@ -36,8 +36,19 @@ out/
 ### VS Code ###
 .vscode/
 
-# dependencies
-/node_modules
+#Node.js
+**/node_modules/
+*.log
 
+# Frontend builds
+frontend/out/
+frontend/.next/
+frontend/dist/
+
+# Generated static files
+backend/src/main/resources/static/
+
+# Environment files
+.env
 .env.local
 .env.docker
