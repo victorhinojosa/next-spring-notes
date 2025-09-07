@@ -2,6 +2,8 @@
 
 A modern note-taking application built with Next.js and Spring Boot, following hexagonal architecture principles.
 
+![Demo](demo.gif)
+
 ## Features
 - ✨ Create and view notes
 - 🎯 Coming soon:
