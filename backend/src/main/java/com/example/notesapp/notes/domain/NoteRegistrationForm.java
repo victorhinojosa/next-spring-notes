@@ -17,6 +17,7 @@ public class NoteRegistrationForm implements Form {
     public boolean isValid() {
         try {
             new NoteId(id);
+            new NoteContent(content);
         } catch (IllegalArgumentException e) {
             return false;
         }

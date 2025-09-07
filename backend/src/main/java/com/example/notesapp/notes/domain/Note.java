@@ -15,6 +15,17 @@ public class Note extends AggregateRoot<NoteId> {
     private final LocalDateTime creationTime;
 
     public Note(NoteId id, NoteContent content, LocalDateTime creationTime) {
+
+        if (id == null) {
+            throw new IllegalArgumentException("Note id is required");
+        }
+        if (content == null) {
+            throw new IllegalArgumentException("Note content is required");
+        }
+        if (creationTime == null) {
+            throw new IllegalArgumentException("Creation time is required");
+        }
+
         this.id = id;
         this.content = content;
         this.creationTime = creationTime;
