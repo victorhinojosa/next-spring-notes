@@ -1,3 +1,4 @@
+### Java / Spring Boot ###
 HELP.md
 .gradle
 build/
@@ -36,19 +37,46 @@ out/
 ### VS Code ###
 .vscode/
 
-#Node.js
+### Node.js / Next.js frontend ###
+# dependencies
 **/node_modules/
-*.log
+/.pnp
+.pnp.js
+.yarn/install-state.gz
 
-# Frontend builds
+# test coverage reports
+/coverage
+
+# Next.js build output
 frontend/out/
 frontend/.next/
 frontend/dist/
 
-# Generated static files
-backend/src/main/resources/static/
+# other frontend build output
+/build
 
-# Environment files
+# misc
+.DS_Store
+*.pem
+
+# debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# environment files
 .env
 .env.local
 .env.docker
+.env*.local
+
+# deployment (Vercel)
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# Generated static files
+backend/src/main/resources/static/

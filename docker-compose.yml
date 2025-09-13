@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  mindkeep-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mindkeep-app
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env.docker
+    restart: unless-stopped
+    # Health check usando Spring Boot Actuator
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'

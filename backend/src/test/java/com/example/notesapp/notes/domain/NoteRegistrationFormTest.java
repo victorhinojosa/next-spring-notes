@@ -41,7 +41,7 @@ class NoteRegistrationFormTest {
     class ValidationTests {
 
         @Test
-        void should_be_invalid_when_id_id_blank() {
+        void should_be_invalid_when_id_is_blank() {
             assertFalse(NoteRegistrationFormMother.withId(null).isValid());
         }
 

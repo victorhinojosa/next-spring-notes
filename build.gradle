@@ -1,3 +1,4 @@
+// ===== ROOT PROJECT BUILD =====
 plugins {
     id 'base'
 }
@@ -13,15 +14,6 @@ subprojects {
     group = 'com.example.mindkeep'
     version = '0.0.1-SNAPSHOT'
 }
-
-tasks.register('runDev') {
-    group = 'application'
-    description = 'Build frontend and run integrated application on port 8080'
-    dependsOn ':frontend:buildNextApp'
-    finalizedBy ':backend:bootRun'
-}
-
-defaultTasks 'buildAll'
 
 wrapper {
     gradleVersion = '8.8'
